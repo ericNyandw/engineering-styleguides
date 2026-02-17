@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/Naming-Conventions-In-Angular-Typcript.iml" filepath="$PROJECT_DIR$/.idea/Naming-Conventions-In-Angular-Typcript.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/engineering-styleguides.iml" filepath="$PROJECT_DIR$/.idea/engineering-styleguides.iml" />
     </modules>
   </component>
 </project>
