@@ -15,8 +15,11 @@ Maintenir une rigueur d'ingénierie constante pour transformer des expérimentat
 ## 🗂️ 2. Index des Guides
 
 ### 🏛️ Gouvernance & Nomenclature
+*   [**angular-typescript**](./angular-typescript/convention-de-nommage-angular.md)
+*   [**codegen-guide.md**](./codegen-guide/codegen-guide.md)
+*   [**repomix.md**](./repomix-guide/repomix.md)
 *   [**repository-guidelines.md**](./repository-guidelines/repository-guidelines.md)
-*   [**readme-template.md**](./templates/readme-template.md)
+
 
 ### ☕ Backend (Java / Spring Boot)
 *   [**codegen-guide.md**](./codegen-guide.md)
@@ -27,7 +30,7 @@ Maintenir une rigueur d'ingénierie constante pour transformer des expérimentat
 *   *⏳ bootstrap-ui-guide.md (À venir)*
 
 ### 🛠️ Outillage & Productivité
-*   [**repomix-guide.md**](./repomix-guide/repomix.md)
+*   *⏳ (À venir)*
 
 ---
 
@@ -35,7 +38,7 @@ Maintenir une rigueur d'ingénierie constante pour transformer des expérimentat
 Pour garantir une lecture rapide, chaque guide présent ici suit ce schéma :
 1.  **Philosophie** : Pourquoi ce standard ?
 2.  **Mise en œuvre** : Étapes techniques (Commandes, Config).
-3.  **Référence Lab** : Lien vers le projet concret (ex: `java-codegen-lab`).
+3.  **Référence Lab** : Lien vers le projet concret (ex : `java-codegen-lab`).
 4.  **Standards** : Ce qui est obligatoire vs ce qui est à éviter.
 
 ---
