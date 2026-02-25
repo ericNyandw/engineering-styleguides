@@ -15,7 +15,7 @@ Maintenir une rigueur d'ingénierie constante pour transformer des expérimentat
 ## 🗂️ 2. Index des Guides
 
 ### 🏛️ Gouvernance & Nomenclature
-*   [**repository-guidelines.md**](./repository-guidelines.md)
+*   [**repository-guidelines.md**](./repository-guidelines/repository-guidelines.md)
 *   [**readme-template.md**](./templates/readme-template.md)
 
 ### ☕ Backend (Java / Spring Boot)
