@@ -19,6 +19,8 @@ Maintenir une rigueur d'ingénierie constante pour transformer des expérimentat
 *   [**codegen-guide.md**](./codegen-guide/codegen-guide.md)
 *   [**repomix.md**](./repomix-guide/repomix.md)
 *   [**repository-guidelines.md**](./repository-guidelines/repository-guidelines.md)
+### 🐳 Infrastructure & DevOps
+*   [**docker-guide.md**](./docker-infra/docker-guide.md) — Standardisation des conteneurs, réseaux et volumes.
 
 
 ### ☕ Backend (Java / Spring Boot)
