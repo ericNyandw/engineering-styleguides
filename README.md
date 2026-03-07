@@ -24,11 +24,11 @@ Maintenir une rigueur d'ingénierie constante pour transformer des expérimentat
 
 
 ### ☕ Backend (Java / Spring Boot)
-*   [**codegen-guide.md**](./codegen-guide.md)
+*   [**angular-codegen-guide.md**](./angular-codegen-guide.md)
 *   *⏳ error-handling-guide.md (À venir)*
 
 ### 🅰️ Frontend (Angular)
-*   *⏳ angular-codegen-guide.md (À venir)*
+*   *[**angular-codegen-guide.md**](./angular-codegen-guide.md) *
 *   *⏳ bootstrap-ui-guide.md (À venir)*
 
 ### 🛠️ Outillage & Productivité

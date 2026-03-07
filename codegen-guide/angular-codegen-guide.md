@@ -107,5 +107,5 @@ isSelected: boolean;
    - **Service Abstraction** : Un composant ne doit pas savoir comment on récupère la donnée, il veut juste la consommer via un Signal.
    ## 🚀 Étude de cas réelle
 Consultez l'implémentation complète (Angular 20, Multi-API, Signals) :
-   👉 **angular-codegen-lab**
+   👉 [**angular-codegen-lab**](https://github.com/ericNyandw/angular-codegen-lab.git)
 
