@@ -1207,4 +1207,155 @@ Finished: SUCCESS
 *    **Push sur Docker Hub**
 **Dis-moi "OK MODULE 3" quand c'est validé ! 🎯**
 
+---
+     
+### 🚀 MODULE 3.5 : AUTOMATISATION & TRIGGERS (BONUS)
 
+**Objectif :**
+À chaque git push sur GitHub → Jenkins lance automatiquement le build (sans cliquer sur "Build Now").
+---
+
+## Étape 1 : Configuration du Webhook dans GitHub
+1. **Va sur GitHub** → Ton repo java-products-lab
+2. **Settings → Webhooks** (menu de gauche)
+3. **Clique sur "Add webhook"**
+4. **Remplis le formulaire :**
+
+
+| **champ**        |                   **Valeur**                    |  
+|:-----------------|:-----------------------------------------------:|
+| **Payload URL**  | `http://VOTRE_IP_PUBLIQUE:8080/github-webhook/` | 
+| **Content type** |               `application/json `               |     
+| **Secret**       |          (laisse vide pour l'instant)           |        
+| **Which events** |             `Just the push event `              |        
+| **Active**       |                     ✅ Coché                     |        
+
+**⚠️ PROBLÈME : Tu es en LOCAL (localhost)**
+
+
+GitHub ne peut pas envoyer de webhook à http://localhost:8080 car c'est ta machine personnelle.
+
+---
+
+## Solutions pour tester en local :
+**Option A : Ngrok (Tunnel temporaire - RECOMMANDÉ pour apprendre)**
+**Ngrok** crée un tunnel public vers ton Jenkins local.
+
+1. **Télécharge Ngrok :** https://ngrok.com/download
+2. Dézipper dans c:/ngrok
+3. **Extrait et lance :**
+```{}Bash
+ngrok http 8080
+```
+4. **Copie l'URL publique** (ex: https://a1b2c3d4.ngrok.io)
+5. **Dans GitHub Webhook**, utilise
+```{}Bash
+https://a1b2c3d4.ngrok.io/github-webhook/
+```
+✅ Avantages :
+
+*  Gratuit pour tester
+* Fonctionne immédiatement
+* Parfait pour apprendre
+❌ Inconvénients :
+
+*  L'URL change à chaque redémarrage
+*  Session limitée (2h en version gratuite)
+
+---
+
+**Option B : Configuration réseau (Avancé)**
+Si tu as une IP publique fixe et que tu maîtrises la redirection de ports sur ton routeur :
+
+1. Configure le port forwarding sur ton routeur :
+*   Port externe : 8080
+*   Port interne : 8080
+*   IP locale : Ton PC (ex: 192.168.1.x)
+2. Trouve ton IP publique : https://www.whatismyip.com
+3. Utilise dans GitHub :
+
+```{}text
+http://VOTRE_IP_PUBLIQUE:8080/github-webhook/
+```
+
+⚠️ **Risque de sécurité :** Ne pas laisser Jenkins exposé publiquement sans sécurité renforcée.
+
+---
+
+## Option C : Poll SCM (Alternative sans webhook)
+**Si tu ne peux pas utiliser de webhook**, Jenkins peut **vérifier GitHub régulièrement :**
+
+**Dans ton pipeline Jenkins :**
+
+1. **Configure** → Section **"Build Triggers"**
+2. **Coche :** Poll SCM
+3. **Schedule** (syntaxe Cron) :
+
+```{}text
+H/5 * * * *
+```
+→ Vérifier GitHub **toutes les 5 minutes**
+
+**Syntaxe Cron expliquée :**
+
+```{}text
+H/5 * * * *
+│  │ │ │ │
+│  │ │ │ └─ Jour de la semaine (0-7, 0 et 7 = Dimanche)
+│  │ │ └─── Mois (1-12)
+│  │ └───── Jour du mois (1-31)
+│  └─────── Heure (0-23)
+└────────── Minute (0-59, H = Hash pour répartir la charge)
+```
+
+✅ Avantages :
+
+*   Pas besoin de webhook
+*   Fonctionne en local
+*   Simple à configurer
+❌ Inconvénients :
+
+*   Délai de 5 minutes max
+*   Consomme des ressources (vérifications fréquentes)
+
+---
+
+## Étape 2 : Activation du déclencheur dans le Jenkinsfile
+
+**Ajoute ce bloc AVANT** `stages` :
+```{}groovy
+pipeline {
+    agent any
+    
+    triggers {
+        githubPush()  // Webhook GitHub
+        // OU
+        pollSCM('H/5 * * * *')  // Vérification toutes les 5 min
+    }
+    
+    tools {
+        jdk 'JDK17'
+        maven 'MAVEN_3.6.3'
+    }
+    
+    // ... reste du code
+}
+```
+
+📖 **Explication :**
+
+
+| **Déclencheur**           |                                   **Comportement**                                    |  
+|:--------------------------|:-------------------------------------------------------------------------------------:|
+| `githubPush()`            |                     Lance le build quand GitHub envoie un webhook                     | 
+| `pollSCM('H/5 * * * *')`  |          Vérifie GitHub toutes les 5 minutes et lance le build si changement          | 
+
+
+
+**📌 POINT 2 : NOTIFICATIONS (Email/Slack)**
+**Option A : Notifications par Email**
+## Étape 1 : Configuration SMTP dans Jenkins
+
+1. Jenkins → Manage Jenkins → Configure System
+2. Descends jusqu'à "Extended E-mail Notification"
+3. Remplis (exemple Gmail) :
