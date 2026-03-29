@@ -642,7 +642,7 @@ post {
 
 | **Condition**     |                **Quand s'exécute-t-elle ?**                |  
 |:------------------|:----------------------------------------------------------:|
-| `success`         |                 Build réussi (vert)                        | 
+| `success`         |                    Build réussi (vert)                     | 
 | `failure`         |                    Build échoué (rouge)                    |     
 | `unstable`        | Build instable (jaune - tests échoués mais compilation OK) |        
 | `always`          |            Toujours, quel que soit le résultat             |        
@@ -872,7 +872,7 @@ setx JAVA_HOME "C:\Program Files\Java\jdk-17"
     *    **Project key :** `java-products-lab` (identifiant unique, sans espaces)
     *    **Main branch name :** `main`
 4. **Clique sur "Next"**
-5. **Choose "Use the global setting"**(analyse continue)
+5. **Choose "Use the global setting"** (analyze continue)
 6. **Clique sur "Create project"**
 
 ---
@@ -1080,7 +1080,7 @@ bat """
 |:-------------------------|:------------------------------------------------------------:|
 | `sonar:sonar`            |               Goal Maven pour lancer l'analyse               | 
 | `-Dsonar.projectKey`     | Identifiant unique du projet (doit correspondre à SonarQube) |     
-| `-Dsonar.projectName`    |                 Nom affiché dans SonarQube                   |        
+| `-Dsonar.projectName`    |                  Nom affiché dans SonarQube                  |        
 | `-Dsonar.projectVersion` |          Numéro de version (ici = numéro de build)           |        
     
 
@@ -1361,3 +1361,290 @@ pipeline {
 1. Jenkins → Manage Jenkins → Configure System
 2. Descends jusqu'à "Extended E-mail Notification"
 3. Remplis (exemple Gmail) :
+
+
+| **Champ**                                                |                           **Valeur**                           |  
+|:---------------------------------------------------------|:--------------------------------------------------------------:|
+| **SMTP server**                                          |                        `smtp.gmail.com`                        | 
+| **SMTP Port **                                           |                             `465`                              | 
+| **Use SSL **                                             |                            ✅ Coché                             | 
+| **SMTP Username**                                        |                     ` ton-email@gmail.com`                     | 
+| **SMTP Password**                                        | ** Mot de passe d'application (pas ton mot de passe Gmail !)** | 
+
+🔐 **Créer un mot de passe d'application Gmail :**
+
+1. Va sur : https://myaccount.google.com/apppasswords
+2. Génère un mot de passe pour "Mail"
+3. Utilise ce mot de passe dans Jenkins
+4. **Teste la configuration** : Clique sur "Test configuration by sending test e-mail"
+
+---
+## Étape 2 : Ajout des notifications dans le Jenkinsfile
+
+Modifie le bloc `post`:
+
+```{}groovy
+post {
+    success {
+        echo '================================================'
+        echo 'PIPELINE REUSSI !'
+        echo "Build #${env.BUILD_NUMBER} termine avec succes"
+        echo "Qualite du code : VALIDE"
+        echo '================================================'
+        
+        emailext(
+            subject: "✅ SUCCESS : Build #${env.BUILD_NUMBER} - ${APP_NAME}",
+            body: """
+                <h2>Build réussi !</h2>
+                <p><strong>Projet :</strong> ${APP_NAME}</p>
+                <p><strong>Build :</strong> #${env.BUILD_NUMBER}</p>
+                <p><strong>Branche :</strong> ${env.GIT_BRANCH}</p>
+                <p><strong>Durée :</strong> ${currentBuild.durationString}</p>
+                <p><a href="${env.BUILD_URL}">Voir les détails</a></p>
+            """,
+            to: 'ton-email@gmail.com',
+            mimeType: 'text/html'
+        )
+    }
+    
+    failure {
+        echo '================================================'
+        echo 'PIPELINE ECHOUE !'
+        echo "Build #${env.BUILD_NUMBER} a echoue"
+        echo 'Cause possible : Quality Gate non respecte'
+        echo '================================================'
+        
+        emailext(
+            subject: "❌ FAILURE : Build #${env.BUILD_NUMBER} - ${APP_NAME}",
+            body: """
+                <h2 style="color: red;">Build échoué !</h2>
+                <p><strong>Projet :</strong> ${APP_NAME}</p>
+                <p><strong>Build :</strong> #${env.BUILD_NUMBER}</p>
+                <p><strong>Erreur :</strong> Consultez la console</p>
+                <p><a href="${env.BUILD_URL}console">Voir les logs</a></p>
+            """,
+            to: 'ton-email@gmail.com',
+   
+            mimeType: 'text/html'
+        )
+    }
+    
+    always {
+        echo '================================================'
+        echo 'NETTOYAGE DU WORKSPACE'
+        echo '================================================'
+        cleanWs()
+    }
+}
+```
+📖 Fonction `emailext` :
+
+
+| **Déclencheur** |                **Comportement**                |  
+|:----------------|:----------------------------------------------:|
+| `subject`       | Objet de l'email (peut contenir des variables) | 
+| `body`          |        Corps de l'email (HTML supporté)        | 
+| `to`            |   Destinataire(s) (séparés par des virgules)   | 
+| `mimeType`      |        `text/html`pour un email stylisé        | 
+
+---
+
+**Option B : Notifications Slack (Alternative moderne)**
+## Étape 1 : Installation du plugin Slack
+1. **Jenkins → Manage Jenkins → Manage Plugins**
+2. **Available plugins** → Recherche `Slack Notification`
+3. **Installe le plugin**
+
+## Étape 2 : Configuration Slack
+1. **Crée un workspace Slack (gratuit)** : https://slack.com
+2. **Crée un canal**: `#jenkins-builds`
+3. **Ajoute l'app Jenkins** :
+   1. Va sur : https://api.slack.com/apps
+   2. Create New App → From scratch
+   3. Nom : `Jenkins CI/CD`
+   4. Active **Incoming Webhooks**
+   5. Copie le **Webhook URL**
+4. **Dans Jenkins → Manage Jenkins → Configure System**
+
+5. **Section Slack** :
+
+*  **Workspace** : Nom de ton workspace
+*  **Credential** : Ajoute le Webhook URL comme `Secret text`
+*  **Default channel** : `#jenkins-builds`
+
+## Étape 3 : Utilisation dans le Jenkinsfile
+
+```{}groovy
+post {
+    success {
+        slackSend(
+            color: 'good',
+            message: "✅ Build SUCCESS : ${APP_NAME} #${env.BUILD_NUMBER}\n<${env.BUILD_URL}|Voir les détails>"
+        )
+    }
+    
+    failure {
+        slackSend(
+            color: 'danger',
+            message: "❌ Build FAILED : ${APP_NAME} #${env.BUILD_NUMBER}\n<${env.BUILD_URL}console|Voir les logs>"
+        )
+    }
+}
+```
+---
+🔧 **Suggestion d'amélioration (Optionnel)**
+**Ajouter des informations Git dans les notifications Slack :**
+
+```{}groovy
+post {
+    success {
+        echo '================================================'
+        echo 'PIPELINE REUSSI !'
+        echo "Build #${env.BUILD_NUMBER} termine avec succes"
+        echo "Qualite du code : VALIDE"
+        echo '================================================'
+        
+        slackSend(
+            color: 'good',
+            message: """
+✅ *Build SUCCESS* : ${APP_NAME} #${env.BUILD_NUMBER}
+📦 *Branche* : ${env.GIT_BRANCH}
+👤 *Auteur* : ${env.GIT_AUTHOR_NAME}
+💬 *Commit* : ${env.GIT_COMMIT_MSG}
+⏱️ *Durée* : ${currentBuild.durationString}
+🔗 <${env.BUILD_URL}|Voir les détails>
+            """.stripIndent()
+        )
+    }
+    
+    failure {
+        echo '================================================'
+        echo 'PIPELINE ECHOUE !'
+        echo "Build #${env.BUILD_NUMBER} a echoue"
+        echo 'Cause possible : Quality Gate non respecte'
+        echo '================================================'
+        
+        slackSend(
+            color: 'danger',
+            message: """
+❌ *Build FAILED* : ${APP_NAME} #${env.BUILD_NUMBER}
+📦 *Branche* : ${env.GIT_BRANCH}
+👤 *Auteur* : ${env.GIT_AUTHOR_NAME}
+⚠️ *Stage échoué* : ${env.STAGE_NAME}
+🔗 <${env.BUILD_URL}console|Voir les logs>
+            """.stripIndent()
+        )
+    }
+}
+```
+
+📖 **Nouvelles variables Jenkins utilisées**:
+
+| **Variable**                     |           **Description**            |  
+|:---------------------------------|:------------------------------------:|
+| `${env.GIT_BRANCH}`              | Nom de la branche Git (ex: `master`) | 
+| `${env.GIT_AUTHOR_NAME}`         |  Nom de l'auteur du dernier commit   | 
+| `${env.GIT_COMMIT_MSG}`          |      Message du dernier commit       | 
+| `${env.STAGE_NAME}`              |      Nom du stage qui a échoué       | 
+| `${currentBuild.durationString}` | Durée du build (ex: `1 min 23 sec`)  | 
+
+Syntaxe Groovy :
+
+*  ` """..."""`  : Triple quotes pour multi-lignes
+*  ` .stripIndent()`  : Supprime l'indentation automatique
+
+---
+## 📊 Résultat visuel dans Slack (exemple)
+
+**En cas de succès** :
+
+```{}text
+✅ Build SUCCESS : java-products-lab #42
+📦 Branche : main
+👤 Auteur : Eric Nyandwi
+💬 Commit : fix: Correction du bug sur ProductService
+⏱️ Durée : 1 min 42 sec
+🔗 Voir les détails
+
+```
+
+**En cas d'échec** :
+
+```{}text
+❌ Build FAILED : java-products-lab #43
+📦 Branche : feature/new-endpoint
+👤 Auteur : Eric Nyandwi
+⚠️ Stage échoué : Quality Gate
+🔗 Voir les logs
+
+```
+
+---
+
+# Voir 👉📘 [Guide Corrigé : Intégration Jenkins ↔ Slack (Méthode Fiable) - Option B : Notifications Slack (Alternative moderne)](./Rapport- Intégration-Jenkins↔Slack.md) 
+
+---
+
+📌 **POINT 3 : TRIGGERS AVANCÉS (Cron, Webhook, Poll SCM)**
+**Tableau comparatif :**
+
+
+| **Type**     | **Syntaxe**                             | **Cas d'usage**                          |             **Exemple**              |
+|:-------------|:----------------------------------------|:-----------------------------------------|:------------------------------------:|
+| **Cron**     | `cron('0 0 * * *')`                     | Build programmé régulier                 |       Tous les jours à minuit        |
+| **Webhooke** | ` githubPush() `                        | À chaque `git push`                      |                                      |
+| **Poll SCM** | `pollSCM('H/15 * * * *')  `             | Vérification périodique                  |          Toutes les 15 min           |
+
+---
+
+**Exemples pratiques dans le Jenkinsfile :**
+
+```{}groovy
+pipeline {
+    agent any
+    
+    triggers {
+        // 1️⃣ Build PROGRAMMÉ : Tous les jours à 2h du matin
+        cron('0 2 * * *')
+        
+        // 2️⃣ Build sur PUSH GitHub
+        githubPush()
+        
+        // 3️⃣ Vérification GitHub toutes les 15 minutes
+        pollSCM('H/15 * * * *')
+    }
+    
+    // ... reste du code
+}
+```
+---
+
+📖 **Guide Cron (Syntaxe complète)**:
+
+```{}text
+┌─── Minute (0-59)
+│ ┌─── Heure (0-23)
+│ │ ┌─── Jour du mois (1-31)
+│ │ │ ┌─── Mois (1-12)
+│ │ │ │ ┌─── Jour de la semaine (0-7, 0 et 7 = Dimanche)
+│ │ │ │ │
+* * * * *
+```
+
+**Exemples concrets :**
+
+| **Déclencheur**  |                  **Comportement**                  |  
+|:-----------------|:--------------------------------------------------:|
+| `0 0 * * *`      |              Tous les jours à minuit               | 
+| `0 2 * * *`      |                Tous les jours à 2h                 | 
+| `0 9 * * 1-5`    |             Du lundi au vendredi à 9h              | 
+| `0 0 * * 0`      |            Tous les dimanches à minuit             | 
+| `H H(0-7) * * *` | Une fois par jour entre 0h et 7h (heure aléatoire) | 
+| `H/15 * * * *`   |    Toutes les 15 minutes (décalé aléatoirement)    | 
+
+
+💡 **Pourquoi** `H` au **lieu de** `*` **?**
+
+*   `H` = Hash (Jenkins calcule une valeur aléatoire basée sur le nom du job)
+*   Évite que tous les jobs se lancent en même temps
+*   Répartit la charge sur le serveur
