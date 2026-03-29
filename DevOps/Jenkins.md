@@ -1199,6 +1199,8 @@ Finished: SUCCESS
 3. **📸 Capture d'écran** (ou description) de la page SonarQube du projet
 4. **❓ Questions** sur SonarQube ou le Jenkinsfile ?
 
+## Voir 📝👉[**Rapport de Résolution : Notifications Jenkins (Module 3)**](.DevOps/Rapport-Notification-Jenkins-Module-3.md)
+
 **Prochaine étape (Module 4) :**
 
 *    Installation de **Docker Desktop** sur Windows
