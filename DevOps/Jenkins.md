@@ -1581,7 +1581,7 @@ Syntaxe Groovy :
 
 ---
 
-# Voir 👉📘 [Guide Corrigé-Option-B-Notifications-Slack](./Rapport- Intégration-Jenkins↔Slack.md) 
+# Voir 👉📘 [Guide Corrigé-Option-B-Notifications-tSlack](./Rapport- Intégration-Jenkins↔Slack.md) 
 
 ---
 
