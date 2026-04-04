@@ -34,7 +34,7 @@ Respectez toujours cet ordre de "poupée russe" pour éviter les bugs :
 * **`docker attach [nom]`** : (Le Patron ✋) Se coller au processus principal (PID 1). `Ctrl+C` **arrête** le conteneur.
 * **`docker exec -it [nom] bash`** : (L'Invité 🚪) Ouvrir une session SSH secondaire pour inspecter.
 
-### Gestion des Images
+### Gestion des Images & Build
 * **`docker images`** : Liste les images locales.
 * **`docker pull [image]`** : Télécharge une image depuis le Hub.
 * **`docker build -t [nom:tag] .`** : Construit une image à partir d'un `Dockerfile`.
@@ -81,4 +81,25 @@ Respectez toujours cet ordre de "poupée russe" pour éviter les bugs :
 * **`./`** : Le dossier actuel (**PWD**).
 
 ---
-*Guide validé et certifié - Mars 2026* 🚀
+
+## 6. 🛠 Dépannage Flash (Builder & API)
+* **`DOCKER_BUILDKIT=0`**: Désactive le moteur moderne (utile si le build plante sans raison).
+* **`$env:DOCKER_API_VERSION="1.44`"** : Répare la connexion si ton terminal est "trop vieux" pour Docker.
+* **`docker buildx ls`** : Vérifie si tes moteurs de build sont running ou inactive.
+* **`docker buildx create --use --name [nom]`** : Crée un nouveau moteur si le default est cassé.
+
+## 7. 📦 Réseaux & Problèmes (Network)
+* **`docker network rm [nom_projet]_default`** : Supprime le réseau qui bloque (obligatoire si tu changes une option IPv4/IPv6).
+* **Pourquoi `_default` ?** Docker Compose ajoute toujours `_default` au nom de ton dossier de projet par sécurité.
+## 8. ⏸ Pause & Relance (Maintenance)
+* **`docker pause [nom]`** : Gèle le conteneur (stoppe le CPU, garde la RAM).
+* **`docker unpause [nom]`** : Réveille le conteneur là où il s'était arrêté.
+* **`docker start [nom]`** : Relance un conteneur éteint (après un `stop` ou un redémarrage PC). **Zéro perte de données si tu as un Volume !**
+
+* **⚠️ Alerte Fichier.env **
+* **Syntaxe** : Utilise `=` (**`KEY=VAL`**). Jamais de : (**`KEY: VAL`**).
+* **Warning** : Si tu vois `Python-dotenv could not parse`, c'est qu'une ligne est mal écrite.
+---
+
+**Astuce pour ton Docker Engine (JSON) :**
+Si l'erreur `driver not connecting` revient, vérifie dans les réglages (JSON) que `"features": { "buildkit": true }` est bien présent. C'est l'interrupteur principal.
